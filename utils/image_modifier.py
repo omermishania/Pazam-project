@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 def create_modified_image(cloudlet_name):
     # Open the image
-    image = Image.open('utils/cloudleton-resized.png')
+    image = Image.open('utils/cloudleton.png')
 
     # Initialize the drawing context with the image
     draw = ImageDraw.Draw(image)

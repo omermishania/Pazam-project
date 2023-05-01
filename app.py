@@ -2,6 +2,7 @@ from flask import Flask, request, send_file, jsonify
 from flask_cors import CORS
 
 from utils.image_modifier import create_modified_image
+from utils.openshift_modifier import create_modified_openshift
 from utils.gallery import get_image_filenames, get_image
 
 app = Flask(__name__)
@@ -32,5 +33,18 @@ def modify_image():
     # Return the modified image as a file download
     return send_file(f'outputs/{cloudlet_name}.png', mimetype='image/png', as_attachment=True)
 
+
+@app.route('/modify-openshift', methods=['POST'])
+def modify_openshift():
+    # Get the cloudlet name from the request body
+    cloudlet_name = request.json['cloudlet_name']
+
+    create_modified_image(cloudlet_name)
+    create_modified_openshift(cloudlet_name)
+
+    return "Image modified", 200
+
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
