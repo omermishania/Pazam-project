@@ -1,5 +1,6 @@
 from openshift.dynamic import DynamicClient, exceptions
 from kubernetes import client
+from kubernetes.client.rest import ApiException
 from openshift.helper.userpassauth import OCPLoginConfiguration
 import base64
 
@@ -88,7 +89,7 @@ def create_configmap(dyn_client, cloudlet_name):
             "name": "cloudlet-logo",
             "namespace": "openshift-config"
         },
-        "data": {
+        "binaryData": {
             "cloudleton.png": image_data
         }
     }
@@ -99,7 +100,16 @@ def create_configmap(dyn_client, cloudlet_name):
         kind="ConfigMap",
     )
 
-    configmaps_group.create(body=cm_patch_body)
+    try:
+        configmaps_group.get(name="cloudlet-logo", namespace="openshift-config")
+        print("ConfigMap 'cloudlet-logo' already exists, skipping creation...")
+    except ApiException as e:
+        if e.status == 404:
+            # if the ConfigMap doesn't exist, create it
+            configmaps_group.create(body=cm_patch_body)
+            print("ConfigMap 'cloudlet-logo' created successfully.")
+        else:
+            raise e
 
 
 def create_modified_openshift(cloudlet_name):
